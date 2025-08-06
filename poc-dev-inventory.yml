@@ -13,10 +13,9 @@ all:
     kafka_controller_jmxexporter_port: 7079
     metadata_migration_retries: 30
 
-    confluent_license_key: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJjb250cm9sLWNlbnRlciIsIm5iNCI6IjE3MTE2MDkxMTciLCJtb25pdG9yaW5nIjp0cnVlLCJsaWNlbnNlVHlwZSI6IkVudGVycHJpc2UiLCJpc3MiOiJDb25mbHVlbnQiLCJpYXQiOjE3MTE2MDkyMDAsImV4cCI6MTc3NzI3MzIwMCwiYXVkIjoiMDA2NFUwMDAwMHFSbllSUUEwIn0=.Y3RYkeQkRaGlybODGDdJZM8qcg1r1RxiJHEP3rNgjXGOWhJp31QmnxLn6b7iTQOeJY4F43L7N91CYRJC09CouemjCI_JpgC4AIwQC2wb-LtM4kmxFRuuLHMe2hUQwwx7RdSSQ5Nt_-26m3JwAbnqfvdBPKVBshVhQzKkEb76HeRaY1RhBvGYs82iOS_TAsgi8towoID-AjMbnUlAozjfPo3E5ohRCVdX0V6B1ngwhT5mLqkE4fv84qnz9m3mfebg_V_x2Tum8NMUs5riVxZeFlo6a3FlhrpdU-W_-HgLu167mbBBoLUeVtaHfH_YwAl5yH7M1w94B4Uzk0LFDDgiRw"
-
-    itka_ldap_user: IT07KA
-    itka_ldap_user_password: **********
+    confluent_license_key: ""
+    itka_ldap_user: 
+    itka_ldap_user_password: 
     redhat_java_package_name: java-17-openjdk
     #custom_java_path: "/etc/java/java-17-openjdk"
     sasl_protocol: plain
@@ -65,19 +64,19 @@ all:
       listener.name.client.plain.sasl.server.callback.handler.class: io.confluent.security.auth.provider.ldap.LdapAuthenticateCallbackHandler
       ldap.com.sun.jndi.ldap.read.timeout: 60000
       ldap.java.naming.factory.initial: com.sun.jndi.ldap.LdapCtxFactory
-      #ldap.java.naming.provider.url: ldap://pnm01181c.safeway.com:3268
-      ldap.java.naming.provider.url: ldap://iam-ad-safeway01-west.safeway.com:389
+      #ldap.java.naming.provider.url: ldap://3268
+      ldap.java.naming.provider.url: ldap://:389
       ldap.java.naming.security.authentication: SIMPLE
       ldap.java.naming.security.credentials: **********
-      ldap.java.naming.security.principal: CN=IT07KA,OU=Service Accounts,OU=People,DC=safeway01,DC=ad,DC=safeway,DC=com
+      ldap.java.naming.security.principal: CN=IT,OU=Service Accounts,OU=People,DC=,DC=,DC=,DC=com
       #ldap.refresh.interval.ms=0
       ldap.search.mode: USERS
       ldap.user.memberof.attribute: memberOf
       ldap.user.memberof.attribute.pattern : (?i)CN=(.*?),.*
       ldap.user.name.attribute: sAMAccountName
       ldap.user.object.class: user
-      ldap.user.search.base: DC=safeway01,DC=ad,DC=safeway,DC=com
-      ldap.user.search.filter: (|(memberOf=CN=az-itka-nonprod-kafkadm,OU=Application RBAC Groups,OU=Azure.Automation.Groups,OU=Groups,DC=safeway01,DC=ad,DC=safeway,DC=com)(memberOf=CN=az-itka-nonprod-kafkadev,OU=Application RBAC Groups,OU=Azure.Automation.Groups,OU=Groups,DC=safeway01,DC=ad,DC=safeway,DC=com))
+      ldap.user.search.base: DC=,DC=ad,DC=,DC=com
+      ldap.user.search.filter: (|(memberOf=CN=az-itka-nonprod-kafkadm,OU=Application RBAC Groups,OU=Azure.Automation.Groups,OU=Groups,DC=,DC=ad,DC=,DC=com)(memberOf=CN=az-itka-nonprod-kafkadev,OU=Application RBAC Groups,OU=Azure.Automation.Groups,OU=Groups,DC=,DC=ad,DC=,DC=com))
       ldap.user.search.scope: 2
       ldap.ssl.truststore.location: "/var/ssl/private/kafka_broker.truststore.jks"
       ldap.ssl.truststore.password: "{{ssl_truststore_password}}"
@@ -133,45 +132,37 @@ all:
 
 zookeeper:
   hosts:
-          # gcp-abs-itka-zk-rhel-nonprod-vm-001.gcp.albertsons.com:
-          #gcp-abs-itka-zk-rhel-nonprod-vm-002.gcp.albertsons.com:
-          #gcp-abs-itka-zk-rhel-nonprod-vm-003.gcp.albertsons.com:
-    dgg011dda.gcp.albertsons.com.ZK:
-      ansible_host: dgg011dda.gcp.albertsons.com
-      hostname: dgg011dda.gcp.albertsons.com
-    dgg011ddb.gcp.albertsons.com.ZK:
-      ansible_host: dgg011ddb.gcp.albertsons.com
-      hostname: dgg011ddb.gcp.albertsons.com
-    dgg011ddc.gcp.albertsons.com.ZK:
-      ansible_host: dgg011ddc.gcp.albertsons.com
-      hostname: dgg011ddc.gcp.albertsons.com
+    pdda.gcp.com.ZK:
+      ansible_host: pdda.gcp.com
+      hostname: pdda.gcp.com
+    pddb.gcp.com.ZK:
+      ansible_host: pddb.gcp.com
+      hostname: pddb.gcp.com
+    pddc.gcp.com.ZK:
+      ansible_host: pddc.gcp.com
+      hostname: pddc.gcp.com
 
 kafka_controller:
   hosts:
-    dgg011dda.gcp.albertsons.com:
-    dgg011ddb.gcp.albertsons.com:
-    dgg011ddc.gcp.albertsons.com:
+    pdda.gcp.com:
+    pddb.gcp.com:
+    pddc.gcp.com:
 
 
 kafka_broker:
   hosts:
-          #gcp-abs-itka-bk-rhel-nonprod-vm-001.gcp.albertsons.com:
-          #gcp-abs-itka-bk-rhel-nonprod-vm-002.gcp.albertsons.com:
-          #gcp-abs-itka-bk-rhel-nonprod-vm-003.gcp.albertsons.com:
-          #gcp-abs-itka-bkr-rhel-nonprod-vm-001.gcp.albertsons.com:
-    dgg011cec.gcp.albertsons.com:
+    p011cec.gcp.com:
       broker_id: 5
-    dgg011ce9.gcp.albertsons.com:
+    p011ce9.gcp.com:
       broker_id: 6
-    dgg011cea.gcp.albertsons.com:
+    p011cea.gcp.com:
       broker_id: 7
-    dgg011ceb.gcp.albertsons.com:
+    p011ceb.gcp.com:
       broker_id: 8
 
 schema_registry:
   hosts:
-          #gcp-abs-itka-sr-rhel-nonprod-vm-001.gcp.albertsons.com:
-    dgg011de1.gcp.albertsons.com:
+    p011de1.gcp.com:
 
 kafka_connect:
   vars:
@@ -188,24 +179,20 @@ kafka_connect:
     kafka_connect_plugins_path:
       - /appl/itka/connect/data
   hosts:
-          #gcp-abs-itka-con-rhel-nonprod-vm-001.gcp.albertsons.com:
-          #gcp-abs-itka-con-rhel-nonprod-vm-002.gcp.albertsons.com:
-          #gcp-abs-itka-con-rhel-nonprod-vm-003.gcp.albertsons.com:
-    dgg011ddd.gcp.albertsons.com:
-    dgg011dde.gcp.albertsons.com:
-    dgg011ddf.gcp.albertsons.com:
+    p011ddd.gcp.com:
+    p011dde.gcp.com:
+    p011ddf.gcp.com:
 
 
 ksql:
   hosts:
-          #gcp-abs-itka-sql-rhel-nonprod-vm-001.gcp.albertsons.com:
-    dgg011de2.gcp.albertsons.com:
+    p011de2.gcp.com:
 
 control_center:
   hosts:
-    dgg011df6.gcp.albertsons.com:
+    p011df6.gcp.com:
 
 kafka_rest:
   hosts:
-          #gcp-abs-itka-rp-rhel-nonprod-vm-001.gcp.albertsons.com:
-    dgg011de0.gcp.albertsons.com:
+    p011de0.gcp.com:
+
