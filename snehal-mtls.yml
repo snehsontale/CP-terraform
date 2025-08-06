@@ -1,0 +1,183 @@
+# Automatically created from terraform data on
+
+all:
+  vars:
+    ansible_connection: ssh
+    ansible_user: ubuntu
+    ansible_become: true
+    ansible_ssh_private_key_file: /home/ubuntu/.ssh/nermin_west-2_oregon.pem
+    deployment_strategy: parallel
+    mask_sensitive_logs: false
+
+    jmxexporter_enabled: true
+    jolokia_enabled: true
+    zookeeper_custom_java_args: "-Dcom.sun.management.jmxremote.port=7203 -Dcom.sun.management.jmxremote.rmi.port=7203 -Dcom.sun.management.jmxremote.local.only=false"
+    kafka_broker_custom_java_args: "-Dcom.sun.management.jmxremote.port=7204 -Dcom.sun.management.jmxremote.rmi.port=7204 -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.jndi.ldap.object.disableEndpointIdentification=true"
+    kafka_connect_custom_java_args: "-Dcom.sun.management.jmxremote.port=7205 -Dcom.sun.management.jmxremote.rmi.port=7205 -Dcom.sun.management.jmxremote.local.only=false"
+    schema_registry_custom_java_args: "-Dcom.sun.management.jmxremote.port=7206 -Dcom.sun.management.jmxremote.rmi.port=7206 -Dcom.sun.management.jmxremote.local.only=false"
+    kafka_rest_custom_java_args: "-Dcom.sun.management.jmxremote.port=7207 -Dcom.sun.management.jmxremote.rmi.port=7207 -Dcom.sun.management.jmxremote.local.only=false"
+    ksql_custom_java_args: "-Dcom.sun.management.jmxremote.port=7208 -Dcom.sun.management.jmxremote.rmi.port=7208 -Dcom.sun.management.jmxremote.local.only=false"
+    control_center_custom_java_args: "-Dcom.sun.management.jmxremote.port=7209 -Dcom.sun.management.jmxremote.rmi.port=7209 -Dcom.sun.management.jmxremote.local.only=false"
+
+
+    # LOG4j
+    kafka_broker_copy_files:
+      - source_path: /home/ubuntu/workspace/rbac/log4j/kafka_custom_log4j.properties
+        destination_path: /etc/kafka/custom_log4j.properties
+    kafka_broker_service_environment_overrides:
+      KAFKA_LOG4J_OPTS: "-Dlog4j.configuration=file:/etc/kafka/custom_log4j.properties"
+
+    zookeeper_log4j_root_logger: "INFO, zkAppender"
+    zookeeper_max_log_files: "10"
+    zookeeper_log_file_size: "100MB"
+
+    kafka_broker_log4j_root_logger: "INFO, kafkaAppender"
+    kafka_broker_log_file_size: "100MB"
+    kafka_broker_max_log_files: "10"
+
+    kafka_connect_log4j_root_logger: "INFO, connectAppender, redactor"
+    kafka_connect_max_log_files: "10"
+    kafka_connect_log_file_size: "100MB"
+
+    kafka_rest_log4j_root_logger: "INFO, file"
+    kafka_rest_log_file_size: "100MB"
+    kafka_rest_max_log_files: "10"
+
+    ksql_log4j_root_logger: "INFO, main"
+    ksql_max_log_files: "5"
+    ksql_log_file_size: "10MB"
+
+    schema_registry_log4j_root_logger: "INFO, file"
+    schema_registry_max_log_files: "10"
+    schema_registry_log_file_size: "100MB"
+
+    control_center_log4j_root_logger: "INFO, main"
+    control_center_max_log_files: "10"
+    control_center_log_file_size: "100MB"
+
+
+
+    #SSL
+    ssl_enabled: true
+    #    ssl_mutual_auth_enabled: true
+    ssl_provided_keystore_and_truststore: true
+    ssl_truststore_filepath: "/home/ubuntu/security/server/ssl/kafka-truststore.jks"
+    ssl_truststore_password: changeme
+    ssl_keystore_filepath: "/home/ubuntu/security/server/ssl/{{inventory_hostname}}-keystore.jks"
+    ssl_keystore_key_password: changeme
+    ssl_keystore_store_password: changeme
+    ssl_truststore_ca_cert_alias: root-ca
+    regenerate_keystore_and_truststore: false
+
+
+    #RBAC BEGIN
+    rbac_enabled: true
+    kafka_broker_custom_listeners:
+      broker:
+        name: BROKER
+        port: 9091
+        ssl_enabled: true
+        ssl_mutual_auth_enabled: true
+      internal:
+        name: INTERNAL
+        port: 9092
+        ssl_enabled: true
+        ssl_mutual_auth_enabled: false
+        sasl_protocol: oauth
+      client_listener:
+        name: CLIENT
+        port: 9093
+        ssl_enabled: true
+        ssl_mutual_auth_enabled: false
+        sasl_protocol: plain
+
+    #LDAP Users
+    mds_super_user: mds
+    mds_super_user_password: mds-secret
+    kafka_broker_ldap_user: kafka
+    kafka_broker_ldap_password: kafka-secret
+    schema_registry_ldap_user: schemaregistry
+    schema_registry_ldap_password: schema-secret
+    kafka_connect_ldap_user: connect
+    kafka_connect_ldap_password: connect-secret
+    ksql_ldap_user: ksql
+    ksql_ldap_password: ksql-secret
+    kafka_rest_ldap_user: rest
+    kafka_rest_ldap_password: rest-secret
+    control_center_ldap_user: controlcenter
+    control_center_ldap_password: c3-secret
+    # Below are optional variables
+    create_mds_certs: true # To provide your own MDS Certs set this variable and the next two
+    #    token_services_private_pem_file: /tmp/certs/tokenKeypair.pem
+    #    token_services_public_pem_file: /tmp/certs/public.pem
+    #    kafka_broker_rest_ssl_enabled: true #defaults to whatever ssl_enabled var is set to
+    #### RBAC END ####
+
+zookeeper:
+  hosts:
+    ip-172-32-49-109.us-west-2.compute.internal:
+    ip-172-32-64-109.us-west-2.compute.internal:
+    ip-172-32-88-249.us-west-2.compute.internal:
+
+kafka_broker:
+  vars:
+    rbac_component_additional_system_admins:
+      - "james"
+      - "srinivas"
+    kafka_broker_custom_properties:
+      super.users: User:mds;User:CN=kafka.servers.kafka.BOOTCAMP-AMERICAS.CONFLUENT.IO;User:kafka.servers.kafka.bootcamp;User:nermin
+      allow.everyone.if.no.acl.found: true
+      #      listener.name.broker.ssl.principal.mapping.rules: |
+      #        RULE:^CN=([a-zA-Z0.9.]*).*$/$1/L , DEFAULT
+      listener.name.broker.ssl.principal.mapping.rules: "RULE:CN=([a-zA-Z0-9.]*).*$/$1/L,DEFAULT"
+      default.replication.factor: 2
+      min.insync.replicas: 2
+      listener.name.client.plain.sasl.server.callback.handler.class: io.confluent.security.auth.provider.ldap.LdapAuthenticateCallbackHandler
+      ldap.java.naming.factory.initial: com.sun.jndi.ldap.LdapCtxFactory
+      ldap.com.sun.jndi.ldap.read.timeout: 3000
+      ldap.java.naming.provider.url: ldaps://samba.bootcamp-americas.confluent.io
+      ldap.java.naming.security.principal: mds@bootcamp-americas.confluent.io
+      ldap.java.naming.security.credentials: mds-secret
+      ldap.java.naming.security.authentication: simple
+      ldap.java.naming.security.protocol: SSL
+      #      ldap.ssl.truststore.location:
+      #      ldap.ssl.truststore.password: truststorepasswd
+      ldap.user.search.base: OU=users,OU=kafka,DC=bootcamp-americas,DC=confluent,DC=io
+      ldap.user.name.attribute: sAMAccountName
+      ldap.user.object.class: user
+      ldap.search.mode: USERS
+      ldap.user.search.scope: 2
+      ldap.user.memberof.attribute: memberOf
+      ldap.user.memberof.attribute.pattern: CN=(.*),OU=Groups,OU=Kafka,DC=bootcamp-americas,DC=confluent,DC=io
+
+  hosts:
+    ip-172-32-59-50.us-west-2.compute.internal:
+    ip-172-32-79-24.us-west-2.compute.internal:
+    ip-172-32-86-51.us-west-2.compute.internal:
+
+
+schema_registry:
+  hosts:
+    ip-172-32-61-235.us-west-2.compute.internal:
+
+
+kafka_rest:
+  hosts:
+    ip-172-32-56-7.us-west-2.compute.internal:
+
+
+ksql:
+  hosts:
+    ip-172-32-54-216.us-west-2.compute.internal:
+
+
+kafka_connect:
+  vars:
+    kafka_connect_confluent_hub_plugins:
+      - "confluentinc/kafka-connect-datagen:0.6.0"
+  hosts:
+    ip-172-32-48-56.us-west-2.compute.internal:
+
+
+control_center:
+  hosts:
