@@ -1,0 +1,211 @@
+all:
+  vars:
+    confluent_package_version: 7.8.0
+    deployment_strategy: rolling
+    ansible_connection: ssh
+    ansible_user: kafka
+    ansible_become: true
+
+    #Added for Zookeeper to Kraft Migration
+    kraft_migration: true
+    hostname_aliasing_enabled: true
+    kafka_controller_port: 9098
+    kafka_controller_jmxexporter_port: 7079
+    metadata_migration_retries: 30
+
+    confluent_license_key: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJjb250cm9sLWNlbnRlciIsIm5iNCI6IjE3MTE2MDkxMTciLCJtb25pdG9yaW5nIjp0cnVlLCJsaWNlbnNlVHlwZSI6IkVudGVycHJpc2UiLCJpc3MiOiJDb25mbHVlbnQiLCJpYXQiOjE3MTE2MDkyMDAsImV4cCI6MTc3NzI3MzIwMCwiYXVkIjoiMDA2NFUwMDAwMHFSbllSUUEwIn0=.Y3RYkeQkRaGlybODGDdJZM8qcg1r1RxiJHEP3rNgjXGOWhJp31QmnxLn6b7iTQOeJY4F43L7N91CYRJC09CouemjCI_JpgC4AIwQC2wb-LtM4kmxFRuuLHMe2hUQwwx7RdSSQ5Nt_-26m3JwAbnqfvdBPKVBshVhQzKkEb76HeRaY1RhBvGYs82iOS_TAsgi8towoID-AjMbnUlAozjfPo3E5ohRCVdX0V6B1ngwhT5mLqkE4fv84qnz9m3mfebg_V_x2Tum8NMUs5riVxZeFlo6a3FlhrpdU-W_-HgLu167mbBBoLUeVtaHfH_YwAl5yH7M1w94B4Uzk0LFDDgiRw"
+
+    itka_ldap_user: IT07KA
+    itka_ldap_user_password: **********
+    redhat_java_package_name: java-17-openjdk
+    #custom_java_path: "/etc/java/java-17-openjdk"
+    sasl_protocol: plain
+    zookeeper_sasl_protocol: digest
+    ssl_enabled: true
+    # add details of custom certs once the certs are available  
+    zookeeper_ssl_enabled: true
+    jmxexporter_enabled: true
+    rbac_enabled: true
+    mds_super_user: "{{itka_ldap_user}}"
+    mds_super_user_password: "{{itka_ldap_user_password}}"
+    kafka_controller_ldap_user: "{{itka_ldap_user}}"
+    kafka_controller_ldap_password: "{{itka_ldap_user_password}}"
+    kafka_broker_ldap_user: "{{itka_ldap_user}}"
+    kafka_broker_ldap_password: "{{itka_ldap_user_password}}"
+    schema_registry_ldap_user: "{{itka_ldap_user}}"
+    schema_registry_ldap_password: "{{itka_ldap_user_password}}"
+    kafka_rest_ldap_user: "{{itka_ldap_user}}"
+    kafka_rest_ldap_password: "{{itka_ldap_user_password}}"
+    kafka_connect_ldap_user: "{{itka_ldap_user}}"
+    kafka_connect_ldap_password: "{{itka_ldap_user_password}}"
+    ksql_ldap_user: "{{itka_ldap_user}}"
+    ksql_ldap_password: "{{itka_ldap_user_password}}"
+    control_center_ldap_user: "{{itka_ldap_user}}"
+    control_center_ldap_password: "{{itka_ldap_user_password}}"
+
+    #ssl_custom_certs: true
+    ssl_provided_keystore_and_truststore: true
+    ssl_keystore_filepath: "/appl/itka/certs/serverauth_cert_dev.jks"
+    ssl_keystore_key_password: secret
+    ssl_keystore_store_password: secret
+    ssl_truststore_filepath: "/appl/itka/certs/trust.jks"
+    ssl_truststore_password: secret
+
+    zookeeper_custom_properties:
+      dataDir: /appl/itka/zookeeper/data
+      4lw.commands.whitelist: "stat, ruok, conf, mntr"
+      #ssl.endpoint.identification.algorithm: ""
+
+    kafka_broker_custom_properties:
+            #ssl.endpoint.identification.algorithm: ""
+      confluent.license: "{{confluent_license_key}}"
+      log.dirs: /appl/itka/kafka/data
+      auto.create.topics.enable: false
+      confluent.balancer.enable: "true"
+      listener.name.client.plain.sasl.server.callback.handler.class: io.confluent.security.auth.provider.ldap.LdapAuthenticateCallbackHandler
+      ldap.com.sun.jndi.ldap.read.timeout: 60000
+      ldap.java.naming.factory.initial: com.sun.jndi.ldap.LdapCtxFactory
+      #ldap.java.naming.provider.url: ldap://pnm01181c.safeway.com:3268
+      ldap.java.naming.provider.url: ldap://iam-ad-safeway01-west.safeway.com:389
+      ldap.java.naming.security.authentication: SIMPLE
+      ldap.java.naming.security.credentials: **********
+      ldap.java.naming.security.principal: CN=IT07KA,OU=Service Accounts,OU=People,DC=safeway01,DC=ad,DC=safeway,DC=com
+      #ldap.refresh.interval.ms=0
+      ldap.search.mode: USERS
+      ldap.user.memberof.attribute: memberOf
+      ldap.user.memberof.attribute.pattern : (?i)CN=(.*?),.*
+      ldap.user.name.attribute: sAMAccountName
+      ldap.user.object.class: user
+      ldap.user.search.base: DC=safeway01,DC=ad,DC=safeway,DC=com
+      ldap.user.search.filter: (|(memberOf=CN=az-itka-nonprod-kafkadm,OU=Application RBAC Groups,OU=Azure.Automation.Groups,OU=Groups,DC=safeway01,DC=ad,DC=safeway,DC=com)(memberOf=CN=az-itka-nonprod-kafkadev,OU=Application RBAC Groups,OU=Azure.Automation.Groups,OU=Groups,DC=safeway01,DC=ad,DC=safeway,DC=com))
+      ldap.user.search.scope: 2
+      ldap.ssl.truststore.location: "/var/ssl/private/kafka_broker.truststore.jks"
+      ldap.ssl.truststore.password: "{{ssl_truststore_password}}"
+      ldap.java.naming.referral: follow
+      password.encoder.secret: "**********"
+      #tiered storage
+      confluent.tier.enable: false
+      confluent.tier.backend: "GCS"
+      confluent.tier.feature: true
+      confluent.tier.gcs.bucket: "itka-tieredstorage-dev-bkt-001"
+      confluent.tier.gcs.region: "us-west2-a"
+      listener.name.mtls.ssl.principal.mapping.rules: "RULE:.*CN=([a-zA-Z0-9.-]*).*$/$1/,DEFAULT"
+      inter.broker.protocol.version: 3.8
+    kafka_broker_custom_listeners:
+      client:
+        name: CLIENT
+        port: 9093
+        ssl_enabled: true
+        sasl_protocol: plain
+      mtls_listener:
+        name: MTLS
+        port: 9095
+        ssl_enabled: true
+        ssl_mutual_auth_enabled: true
+        ssl_client_authentication: required
+        sasl_protocol: none
+    control_center_custom_properties:
+      confluent.license: "{{confluent_license_key}}"
+      confluent.controlcenter.data.dir: /appl/itka/c3/data
+
+    ksql_rocksdb_path: /appl/itka/ksql/rocksdb
+
+    ksql_custom_properties:
+      ksql.streams.state.dir: /appl/itka/ksql/data
+      confluent.license: "{{confluent_license_key}}"
+
+    schema_registry_custom_properties:
+      confluent.license: "{{confluent_license_key}}"
+      kafkastore.timeout.ms: 1000
+
+    kafka_connect_custom_properties:
+      confluent.license: "{{confluent_license_key}}"
+
+    kafka_connect_service_environment_overrides:
+      KAFKA_HEAP_OPTS: "-Xms2g -Xmx18g"
+
+    kafka_rest_custom_properties:
+      confluent.license: "{{confluent_license_key}}"
+      consumer.instance.timeout.ms: 172800000
+      consumer.request.max.bytes: 67108864000
+      consumer.request.timeout.ms: 5000
+      consumer.threads: -1
+
+zookeeper:
+  hosts:
+          # gcp-abs-itka-zk-rhel-nonprod-vm-001.gcp.albertsons.com:
+          #gcp-abs-itka-zk-rhel-nonprod-vm-002.gcp.albertsons.com:
+          #gcp-abs-itka-zk-rhel-nonprod-vm-003.gcp.albertsons.com:
+    dgg011dda.gcp.albertsons.com.ZK:
+      ansible_host: dgg011dda.gcp.albertsons.com
+      hostname: dgg011dda.gcp.albertsons.com
+    dgg011ddb.gcp.albertsons.com.ZK:
+      ansible_host: dgg011ddb.gcp.albertsons.com
+      hostname: dgg011ddb.gcp.albertsons.com
+    dgg011ddc.gcp.albertsons.com.ZK:
+      ansible_host: dgg011ddc.gcp.albertsons.com
+      hostname: dgg011ddc.gcp.albertsons.com
+
+kafka_controller:
+  hosts:
+    dgg011dda.gcp.albertsons.com:
+    dgg011ddb.gcp.albertsons.com:
+    dgg011ddc.gcp.albertsons.com:
+
+
+kafka_broker:
+  hosts:
+          #gcp-abs-itka-bk-rhel-nonprod-vm-001.gcp.albertsons.com:
+          #gcp-abs-itka-bk-rhel-nonprod-vm-002.gcp.albertsons.com:
+          #gcp-abs-itka-bk-rhel-nonprod-vm-003.gcp.albertsons.com:
+          #gcp-abs-itka-bkr-rhel-nonprod-vm-001.gcp.albertsons.com:
+    dgg011cec.gcp.albertsons.com:
+      broker_id: 5
+    dgg011ce9.gcp.albertsons.com:
+      broker_id: 6
+    dgg011cea.gcp.albertsons.com:
+      broker_id: 7
+    dgg011ceb.gcp.albertsons.com:
+      broker_id: 8
+
+schema_registry:
+  hosts:
+          #gcp-abs-itka-sr-rhel-nonprod-vm-001.gcp.albertsons.com:
+    dgg011de1.gcp.albertsons.com:
+
+kafka_connect:
+  vars:
+    kafka_connect_confluent_hub_plugins:
+      - confluentinc/kafka-connect-datagen:latest
+      - confluentinc/kafka-connect-jdbc:10.7.4
+      - confluentinc/kafka-connect-gcs:10.1.8
+      - confluentinc/kafka-connect-ibmmq:12.2.3
+      - mongodb/kafka-connect-mongodb:1.11.1
+      - wepay/kafka-connect-bigquery:2.5.4
+      - confluentinc/kafka-connect-azure-blob-storage:1.6.21
+      - confluentinc/kafka-connect-azure-blob-storage-source:2.5.19
+      - confluentinc/kafka-connect-azure-service-bus:1.2.10
+    kafka_connect_plugins_path:
+      - /appl/itka/connect/data
+  hosts:
+          #gcp-abs-itka-con-rhel-nonprod-vm-001.gcp.albertsons.com:
+          #gcp-abs-itka-con-rhel-nonprod-vm-002.gcp.albertsons.com:
+          #gcp-abs-itka-con-rhel-nonprod-vm-003.gcp.albertsons.com:
+    dgg011ddd.gcp.albertsons.com:
+    dgg011dde.gcp.albertsons.com:
+    dgg011ddf.gcp.albertsons.com:
+
+
+ksql:
+  hosts:
+          #gcp-abs-itka-sql-rhel-nonprod-vm-001.gcp.albertsons.com:
+    dgg011de2.gcp.albertsons.com:
+
+control_center:
+  hosts:
+    dgg011df6.gcp.albertsons.com:
+
+kafka_rest:
+  hosts:
+          #gcp-abs-itka-rp-rhel-nonprod-vm-001.gcp.albertsons.com:
+    dgg011de0.gcp.albertsons.com:
